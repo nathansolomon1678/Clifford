@@ -58,8 +58,8 @@ void create_image(int heatmap[height][width], int width, int height) {
     lodepng::encode("image.png", image_data, width, height, LCT_RGB);
 }
 
-std::vector<std::tuple<float, float>> generate_points(int n, int heatmap[height][width], int& points_drawn, int thread_number) {
-    // returns a list of n points
+void plot_points(int n, int heatmap[height][width], int& points_drawn, int thread_number) {
+    // Generates n points and adds them to the heatmap
     std::vector<std::tuple<float, float>> points = {};
     for (int point = 0; point < n; point++) {
         float x, y;
@@ -70,11 +70,10 @@ std::vector<std::tuple<float, float>> generate_points(int n, int heatmap[height]
             heatmap[i][j]++;
         }
         points_drawn++;
-        if (thread_number == 0 && points_drawn % 100000 == 0) {
+        if (thread_number == 0 && points_drawn % 1000 == 0) {
             std::cout << "\033[A\33[2K" << 100. * double(points_drawn) / double(num_points) << "\% complete" << std::endl;
         }
     }
-    return points;
 }
 
 
@@ -85,7 +84,7 @@ int main() {
     std::array<std::thread, num_threads> threads;
     std::vector<std::tuple<float, float>> points = {};
     for (int i = 0; i < num_threads; i++) {
-        threads[i] = std::thread(generate_points, num_points / num_threads, heatmap, std::ref(points_drawn), i);
+        threads[i] = std::thread(plot_points, num_points / num_threads, heatmap, std::ref(points_drawn), i);
     }
     for (std::thread& current_thread: threads) {
         current_thread.join();

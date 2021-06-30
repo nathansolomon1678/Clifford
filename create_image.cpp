@@ -17,11 +17,12 @@ const int scale = 200;
 const int height = 1000;
 const int width = 1000;
 
+const float scaledMax = float(RAND_MAX) * 2. - 1.;
 const int num_threads = 8;
 
 inline std::tuple<float, float> new_point() {
-    float x = rand() / float(RAND_MAX) * 2. - 1.;
-    float y = rand() / float(RAND_MAX) * 2. - 1.;
+    float x = rand() / scaledMax;
+    float y = rand() / scaledMax;
     for (int i = 0; i < iterations; i++) {
         float temp_x = sin(A * y) + C * cos(A * x);
         float temp_y = sin(B * x) + D * cos(B * y);
@@ -61,11 +62,13 @@ void create_image(int heatmap[height][width], int width, int height) {
 std::vector<std::tuple<float, float>> generate_points(int n, int heatmap[height][width]) {
     // returns a list of n points
     std::vector<std::tuple<float, float>> points = {};
+	float halfHeight = height / 2.;
+	float halfWidth = width / 2.;
     for (int point = 0; point < n; point++) {
         float x, y;
         std::tie(x, y) = new_point();
-        int i = height / 2. - scale * y;
-        int j = width  / 2. - scale * x;
+        int i = halfHeight - scale * y;
+        int j = halfWidth - scale * x;
         if (i >= 0 && i < height && j >= 0 && j < width) {
             heatmap[i][j]++;
         }

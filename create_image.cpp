@@ -6,12 +6,12 @@
 #include <math.h>
 #include <stdlib.h>
 
-const float A = 1.5;
-const float B = .8;
-const float C = 1.5;
-const float D = 2.5;
+const float A = 1.4;
+const float B = .9;
+const float C = 2.;
+const float D = 1.9;
 const int num_points = 100000000;
-const int iterations = 20;
+const int iterations = 15;
 
 const int scale = 200;
 const int height = 1000;

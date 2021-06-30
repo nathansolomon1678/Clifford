@@ -6,16 +6,16 @@
 #include <math.h>
 #include <stdlib.h>
 
-const float A = 1.4;
-const float B = .9;
-const float C = 2.;
-const float D = 1.9;
-const int num_points = 100000000;
+const float A = 1.46;
+const float B = 2.2;
+const float C = 1.94;
+const float D = 1.17;
+const int num_points = 200000000;
 const int iterations = 15;
 
-const int scale = 200;
-const int height = 1000;
-const int width = 1000;
+const int scale = 250;
+const int height = 1080;
+const int width = 1920;
 
 const int num_threads = 8;
 
@@ -58,7 +58,7 @@ void create_image(int heatmap[height][width], int width, int height) {
     lodepng::encode("image.png", image_data, width, height, LCT_RGB);
 }
 
-std::vector<std::tuple<float, float>> generate_points(int n, int heatmap[height][width]) {
+std::vector<std::tuple<float, float>> generate_points(int n, int heatmap[height][width], int& points_drawn, int thread_number) {
     // returns a list of n points
     std::vector<std::tuple<float, float>> points = {};
     for (int point = 0; point < n; point++) {
@@ -69,6 +69,10 @@ std::vector<std::tuple<float, float>> generate_points(int n, int heatmap[height]
         if (i >= 0 && i < height && j >= 0 && j < width) {
             heatmap[i][j]++;
         }
+        points_drawn++;
+        if (thread_number == 0 && points_drawn % 100000 == 0) {
+            std::cout << "\033[A\33[2K" << 100. * double(points_drawn) / double(num_points) << "\% complete" << std::endl;
+        }
     }
     return points;
 }
@@ -76,11 +80,12 @@ std::vector<std::tuple<float, float>> generate_points(int n, int heatmap[height]
 
 int main() {
     int heatmap[height][width];
-    std::cout << "Drawing " << num_points << " points using " << num_threads << " threads..." << std::endl;
+    int points_drawn;
+    std::cout << "Drawing " << num_points << " points using " << num_threads << " threads..." << std::endl << std::endl;
     std::array<std::thread, num_threads> threads;
     std::vector<std::tuple<float, float>> points = {};
     for (int i = 0; i < num_threads; i++) {
-        threads[i] = std::thread(generate_points, num_points / num_threads, heatmap);
+        threads[i] = std::thread(generate_points, num_points / num_threads, heatmap, std::ref(points_drawn), i);
     }
     for (std::thread& current_thread: threads) {
         current_thread.join();
